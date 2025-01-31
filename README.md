@@ -26,5 +26,4 @@ Installation.
 
 ```sh
  1. Find this plugin in the A.V.A.T.A.R plugin library and click on `install`
- 2. Read the information page to add the default timezone
 ```
