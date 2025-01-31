@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     searchTop:() => ipcRenderer.invoke('webradio-top'),
     getSelected: (value) => ipcRenderer.invoke('webradio-selected', value),
     getMsg: (value) => ipcRenderer.invoke('webradio-msg', value),
+    setStatus: (value) => ipcRenderer.invoke('webradio-status', value),
     setPosition: () => ipcRenderer.send('webradio-position'),
     quit: () => ipcRenderer.send('webradio-quit')
 })

@@ -12,6 +12,7 @@ body {
     overflow: hidden;
     margin: 0px;
     font-family: "Roboto";
+    -webkit-app-region: drag;
 }
 
 x-menuitem, x-label {
@@ -50,6 +51,7 @@ input::placeholder {
     width: 26px;
     height: 26px;
     cursor: pointer;
+    -webkit-app-region: no-drag;
 }
 
 #notification {
@@ -70,6 +72,7 @@ input::placeholder {
     width: 22px;
     height: 22px;
     cursor: pointer;
+    -webkit-app-region: no-drag;
 }
 
 .row {
@@ -85,6 +88,8 @@ input::placeholder {
     max-width: 190px;
     font-weight: 400;
     z-index: 98;
+    -webkit-app-region: no-drag;
+
 }
 
 .microsite .rde-custom-container {
@@ -93,6 +98,7 @@ input::placeholder {
     padding-top: 0 !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
+    -webkit-app-region: no-drag;
 }
 
 .microsite #rde-player .ngrs-range-slider {
@@ -108,7 +114,6 @@ input::placeholder {
     left: 25px;
     color: #ccc;
     cursor: default;
-    -webkit-app-region: drag;
 }
 
 .preview-zone {
@@ -131,6 +136,7 @@ input::placeholder {
     border-radius: 6px;
     padding: 3px;
     z-index: 99;
+    -webkit-app-region: no-drag;
 }
 
 .fa {

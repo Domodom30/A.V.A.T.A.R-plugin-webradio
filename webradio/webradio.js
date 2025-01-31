@@ -227,6 +227,7 @@ const openWebRadioWindow = async () => {
         };
     });
 
+
     // Search Radio
     Avatar.Interface.ipcMain().handle("webradio-search", async (_event, arg) => {
         const apiUrl = `https://prod.radio-api.net/stations/search?query=${arg}&count=10&offset=0`;
@@ -244,6 +245,10 @@ const openWebRadioWindow = async () => {
         return Locale.get(arg);
     });
 
+    Avatar.Interface.ipcMain().handle("webradio-status", async (_event, arg) => {
+        statusStartup(arg)
+    })
+
     WebRadioWindow.on("closed", () => {
         currentwidgetState = false;
         Avatar.Interface.ipcMain().removeHandler("webradio-msg");
@@ -251,6 +256,7 @@ const openWebRadioWindow = async () => {
         Avatar.Interface.ipcMain().removeHandler("webradio-config");
         Avatar.Interface.ipcMain().removeHandler("webradio-search");
         Avatar.Interface.ipcMain().removeHandler("webradio-top");
+        Avatar.Interface.ipcMain().removeHandler("webradio-status");
         Avatar.Interface.ipcMain().removeHandler("webradio-reload");
         Avatar.Interface.ipcMain().removeHandler("webradio-selected");
         Avatar.Interface.ipcMain().removeAllListeners("webradio-position");
@@ -324,6 +330,17 @@ const save_selected = async (radio) => {
     }
     prop.modules.webradio.selection = { radio: radio };
     fs.writeJsonSync(path.resolve(__dirname, "webradio.prop"), prop);
+};
+
+const statusStartup = async (status) => {
+    let prop = {};
+    if (fs.existsSync(path.resolve(__dirname, "assets", "style.json"))) {
+        prop = fs.readJsonSync(path.resolve(__dirname, "assets", "style.json"), {
+            throws: false,
+        });
+    }
+    prop.start = status;
+    fs.writeJsonSync(path.resolve(__dirname, "assets", "style.json"), prop);
 };
 
 const save_position = async () => {

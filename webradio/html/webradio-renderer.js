@@ -25,6 +25,7 @@ document.querySelector("#btn-search").addEventListener("click", () => {
 });
 
 document.querySelector("#exit").addEventListener("click", () => {
+    window.electronAPI.setStatus(false);
     window.electronAPI.quit();
 });
 
@@ -163,4 +164,5 @@ async function notification(msg) {
 window.electronAPI.onInitWebRadio((_event) => {
     setElementLabel();
     createPlayer();
+    window.electronAPI.setStatus(true);
 });
