@@ -8,7 +8,7 @@
 ![GitHub License](https://img.shields.io/github/license/Domodom30/A.V.A.T.A.R-plugin-webradio)
 
 ### ✨ Fonctionnalité
-Le plugin Webradio est un player [radio](https://www.radio.net) pour le framework [A.V.A.T.A.R](https://github.com/Avatar-Home-Automation).
+Le plugin Webradio est un player [_radio.net_](https://www.radio.net) pour le framework [A.V.A.T.A.R](https://github.com/Avatar-Home-Automation).
 Il vous permettra d'écouter la radio de votre choix.
 
 - Player radio.net
