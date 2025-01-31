@@ -25,5 +25,5 @@ webradio requires [Avatar Server](https://github.com/Avatar-Home-Automation) v5.
 Installation.
 
 ```sh
- 1. Find this plugin in the A.V.A.T.A.R plugin library and click on `install`
+ 1. Trouvez ce plugin dans la bibliothèque de plugins A.V.A.T.A.R et cliquez sur `installer`.
 ```
