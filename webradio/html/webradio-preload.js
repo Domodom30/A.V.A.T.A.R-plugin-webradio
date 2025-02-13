@@ -2,14 +2,11 @@ const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('electronAPI', {
     onInitWebRadio: (callback) => ipcRenderer.on('onInit-webradio', (_event, value) => callback(value)),
-    reloadWebRadio: () => ipcRenderer.invoke('webradio-reload'),
-    getList:() => ipcRenderer.invoke('webradio-liste'),
+    nameRadio:(value) => ipcRenderer.on('name-radio', value),
+    setRadio:() => ipcRenderer.invoke('webradio-radio'),
     getConfig:() => ipcRenderer.invoke('webradio-config'),
-    searchRadio:(value) => ipcRenderer.invoke('webradio-search', value),
-    searchTop:() => ipcRenderer.invoke('webradio-top'),
-    getSelected: (value) => ipcRenderer.invoke('webradio-selected', value),
     getMsg: (value) => ipcRenderer.invoke('webradio-msg', value),
-    setStatus: (value) => ipcRenderer.invoke('webradio-status', value),
+    searchTop:() => ipcRenderer.invoke('webradio-top'),
     setPosition: () => ipcRenderer.send('webradio-position'),
     quit: () => ipcRenderer.send('webradio-quit')
 })

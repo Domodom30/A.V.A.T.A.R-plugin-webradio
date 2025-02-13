@@ -8,15 +8,17 @@
 ![GitHub License](https://img.shields.io/github/license/Domodom30/A.V.A.T.A.R-plugin-webradio)
 
 ### ✨ Fonctionnalité
-Le plugin Webradio est un player [_radio.net_](https://www.radio.net) pour le framework [A.V.A.T.A.R](https://github.com/Avatar-Home-Automation).
+Le plugin Webradio est un player radio pour le framework [A.V.A.T.A.R](https://github.com/Avatar-Home-Automation).
 Il vous permettra d'écouter la radio de votre choix.
 
-- Player radio.net
-- Sélection & recherche de radio
+- Par défaut, 75 radios seront disponibles, vous pouvez augmenter le nombre dans la configuration du plugin.[search/nbradio]
+- Vous pouvez également ajouter vos radios favorites dans [selection/favoris]
+- le player est multiroom (mets la radio dans la chambre/salon etc...)
 - ✨ Rapide ✨
 
 ### ✨ Nouvelle Fonctionnalité
 - **[Startup]**: Si le player radio est lancé et que le serveur redémarre la radio sera relancée.
+- Le Player est basé sur la librairie [Amplitudejs](https://521dimensions.com/open-source/amplitudejs) - ✨ Rapide ✨
 
 ## Installation
 

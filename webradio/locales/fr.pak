@@ -1,23 +1,11 @@
 {
-  "label": {
-    "radio": "Radios :",
-    "select": "Sélectionnez une radio",
-    "position": "Sauvegarder la position",
-    "search": "Rechercher une radio",
-    "resultSearch":"Le résultat se trouve dans la liste",
-    "move": "Cliquez ici pour déplacer la fenêtre",
-    "exit": "Fermer la radio"
-  },
-  "message": {
-    "launch": "Je lance la radio",
-    "open-webardio": "je lance la radio $$",
-    "close-webardio": "je ferme la radio $$",
-    "quit": "Fermer"
-  },
-  "notification": {
-        "savePosition":"Position enregistrée"
+    "message": {
+        "launch": "Je lance la radio",
+        "launch-client": "Je lance la radio sur le client $$",
+        "stopradio": "J'arrête la radio"
     },
-  "error": {
-    "noradio": "je suis désolé, je n'ai pas réussi à récupérer le flux de la radio $$"
-  }
+    "error": {
+        "noradio": "je suis désolé, je n'ai pas trouvé la radio",
+        "error": "Une erreur s'est produite lors de la récupération des données."
+    }
 }

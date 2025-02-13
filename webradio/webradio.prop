@@ -1,26 +1,55 @@
 {
     "modules": {
         "webradio": {
-            "version": "2.2.0",
-            "name": "WebRadio",
+            "version": "2.3.0",
+            "name": "webradio",
+            "devices": {},
+            "clients": {
+                "Salon": "Salon"
+            },
             "rules": {
                 "play": [
-                    "radio"
+                    "(~put~|~play~) the? radio",
+                    "listen to? the? radio"
+                ],
+                "stop": [
+                    "(~stop~|~cut~) the? radio"
                 ]
             },
             "widget": {
-                "display": true
+                "display": true,
+                "autoUpdate": {
+                    "delay": 30,
+                    "start": false
+                },
+                "font": {
+                    "status": 8,
+                    "title": 12,
+                    "value": 10,
+                    "position": "bottom"
+                },
+                "latency": 0,
+                "latency_macro": 0,
+                "opacity": 0.7,
+                "borderWidth": 5,
+                "size": 40,
+                "color": "rgba(107, 101, 99, 1)",
+                "textColor": "rgba(255, 255, 255, 1)"
             },
             "window": {
-                "width": 380,
-                "height": 135,
+                "width": 375,
+                "height": 138,
                 "opacity": 1
             },
             "devTools": false,
             "notification": 3000,
             "active": true,
             "selection": {
-                "radio": "radionova"
+                "radio": "fun radio",
+                "favoris": ["rire et chanson", "nrj"]
+            },
+            "search": {
+                "nbradio": 75
             }
         }
     }

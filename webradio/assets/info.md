@@ -5,6 +5,6 @@ This plugin is an add-on for the framework. [Avatar](https://github.com/Avatar-H
 ![webradio](../../core/plugins/webradio/assets/images/radioAva.png =150x*)
 
 ## ★ Note
-The webradio plugin allows you to start a radio station by voice command and display the player on the server interface. You can also switch between radio stations using the player.
+The webradio plugin allows you to start the radio in a desired room and display the player on the client interface. You can also switch radio stations using the player.
 
 <br><br><br>

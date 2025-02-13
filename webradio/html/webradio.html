@@ -1,37 +1,88 @@
-<!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="UTF-8">
-    <script src="../../../../node_modules/xel/xel.js" type="module"></script>
-
-    <meta http-equiv="Content-Security-Policy" content="default-src https://www.radio.fr https://station-images.prod.radio-api.net https://cdnjs.cloudflare.com 'self'; img-src https://station-images.prod.radio-api.net https://cdnjs.cloudflare.com data: blob: * 'self'; script-src 'self' https://www.radio.fr 'unsafe-eval'; script-src-elem https://www.radio.fr 'self'; style-src https://www.radio.fr https://cdnjs.cloudflare.com 'self' 'unsafe-inline'; connect-src https://prod.radio-api.net 'self'; media-src https://prod.radio-api.net https://station-images.prod.radio-api.net data: blob: * 'self'">
-    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="https://www.radio.fr/inc/microsite/css/radio.css" type="text/css">
-    <link rel="stylesheet" href="./css/radio.css" type="text/css">
-
+    <script type="text/javascript" src="./player/amplitude.js"></script>
+    <link type="text/css" rel="stylesheet" href="./player/styles.css" />
 </head>
 
 <body>
-    <div id="player"></div>
-    <div id="label-radio" class="label-radio"></div>
-    <img id="position" src='../assets/images/position.png' />
-    <img id="exit" src='../assets/images/off.png' />
+    <div class="container">
+        <div class="left">
+            <div id="white-player">
+                <div class="white-player-top">
+                    <div>
+                        <img src="./player/img/show-playlist.svg" class="show-playlist" />
+                        <img src='./player/img/off.png' class="exit" />
+                    </div>
+                </div>
 
-    <x-select id="select-radio" size="small" class="select-radio" >
-        <x-menu id="menu-radio"></x-menu>
-      </x-select>
+                <div id="white-player-center">
+                    <div class="song-meta-data">
+                        <img class="main-album-art" data-amplitude-song-info="cover_art_url" />
+                        <span data-amplitude-song-info="name" class="song-name"></span>
+                        <span data-amplitude-song-info="genre" class="song-genre"></span>
+                    </div>
+
+                    <div class="time-progress">
+                        <div id="progress-container">
+                            <input type="range" class="amplitude-song-slider" />
+                            <progress id="song-played-progress" class="amplitude-song-played-progress"></progress>
+                            <progress id="song-buffered-progress" class="amplitude-buffered-progress"
+                                value="0"></progress>
+                        </div>
+
+                        <div class="time-container">
+                            <span class="current-time">
+                                <span class="amplitude-current-minutes"></span>:<span
+                                    class="amplitude-current-seconds"></span>
+                            </span>
+                            <span class="duration">
+                                <span class="amplitude-duration-minutes"></span>:<span
+                                    class="amplitude-duration-seconds"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="white-player-controls">
+                    <div class="amplitude-prev" id="previous"></div>
+                    <div class="amplitude-play-pause" id="play-pause"></div>
+                    <div class="amplitude-next" id="next"></div>
+                </div>
+
+                <div id="white-player-playlist-container">
+                    <div class="white-player-playlist-top">
+                        <div>
+                            <img src="./player/img/close.svg" class="close-playlist" />
+                        </div>
+                    </div>
 
 
-    <div id="form-search" class="form-search">
-        <input id="input-searchRadio" type="search">
-        <i id="btn-search" class="fa fa-search"></i>
+
+                    <div class="white-player-playlist"></div>
+
+                    <div class="white-player-playlist-controls">
+                        <img data-amplitude-song-info="cover_art_url" class="playlist-album-art" />
+
+                        <div class="playlist-controls">
+                            <div class="playlist-meta-data">
+                                <span data-amplitude-song-info="name" class="song-name"></span>
+                                <span data-amplitude-song-info="genre" class="song-genre"></span>
+                            </div>
+
+                            <div class="playlist-control-wrapper">
+                                <div class="amplitude-prev" id="playlist-previous"></div>
+                                <div class="amplitude-play-pause" id="playlist-play-pause"></div>
+                                <div class="amplitude-next" id="playlist-next"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <x-notification id="notification"></x-notification>
-
 </body>
-<script src="./webradio-renderer.js"></script>
+<script type="text/javascript" src="./webradio-renderer.js"></script>
 
 </html>

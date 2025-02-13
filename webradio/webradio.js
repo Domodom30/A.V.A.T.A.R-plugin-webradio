@@ -2,7 +2,6 @@ import * as path from "node:path";
 import * as url from "url";
 import fs from "fs-extra";
 import axios from "axios";
-import * as cheerio from "cheerio";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
@@ -11,9 +10,11 @@ import * as widgetLib from "../../../widgetLibrairy.js";
 const Widget = await widgetLib.init();
 
 let periphInfo = [];
+let sentenceRadio = [];
 let Locale;
 let currentwidgetState;
 let WebRadioWindow;
+let listeRadios;
 
 const widgetFolder = path.resolve(__dirname, "assets/widget");
 const widgetImgFolder = path.resolve(__dirname, "assets/images/widget");
@@ -24,25 +25,7 @@ export async function onClose(widgets) {
         if (widgets) await Widget.saveWidgets(widgets);
     }
 
-    if (WebRadioWindow) {
-        let pos = WebRadioWindow.getPosition();
-
-        fs.writeJsonSync(path.resolve(__dirname, "assets", "style.json"), {
-            x: pos[0],
-            y: pos[1],
-            start: true,
-        });
-    } else {
-        let prop = {};
-        if (fs.existsSync(path.resolve(__dirname, "assets", "style.json"))) {
-            prop = fs.readJsonSync(path.resolve(__dirname, "assets", "style.json"), {
-                throws: false,
-            });
-        }
-
-        prop.start = false;
-        fs.writeJsonSync(path.resolve(__dirname, "assets", "style.json"), prop);
-    }
+    save_params(false);
 }
 
 export async function init() {
@@ -51,9 +34,12 @@ export async function init() {
     }
 
     Locale = await Avatar.lang.getPak("webradio", Config.language);
+
     if (!Locale) {
         return error(`webradio: Unable to find the '${Config.language}' language pak.`);
     }
+
+    listeRadios = await searchTopRadios();
 
     periphInfo.push({
         Buttons: [
@@ -69,31 +55,36 @@ export async function init() {
 }
 
 export async function action(data, callback) {
-    try {
-        Locale = await Avatar.lang.getPak("webradio", data.language);
-        if (!Locale) {
-            throw new Error(`webRadio: Unbale to find the '${data.language}' language pak.`);
-        }
-        const tblActions = {
-            play: () => {
-                Avatar.speak(Locale.get('message.launch'), data.client, () => {
-                    play(data)
-                })
-            } 
-        };
-
-        tblActions[data.action.command]();
-
-        info(
-            "webradio: ",
-            data.action.command + " the radio " + data.relations.item.text,
-            L.get("plugin.from"),
-            data.client
-        );
-    } catch (err) {
-        if (data.client) Avatar.Speech.end(data.client);
-        if (err.message) error(err.message);
+    if (!Locale) {
+        return errStart("No language pack available. first, add a language pack for the current language.", callback);
     }
+
+    Locale = await Avatar.lang.getPak("webradio", Config.language);
+
+    const tblActions = {
+        play: () => {
+            sentenceRadio = [];
+            compareSearchRadio(data.action.radio, listeRadios.resultat);
+            if (sentenceRadio) {
+                if (WebRadioWindow) {
+                    Avatar.speak(Locale.get("message.launch"), data.client, () => {
+                        WebRadioWindow.webContents.send("name-radio", sentenceRadio);
+                    });
+                } else {
+                    setPlay(data);
+                }
+            } else {
+                Avatar.speak(Locale.get("error.noradio"), data.client);
+            }
+        },
+        stop: () => {
+            setStop(data);
+        },
+    };
+
+    tblActions[data.action.command]();
+
+    info("webradio: ", data.action.command, L.get("plugin.from"), data.client);
 
     callback();
 }
@@ -120,11 +111,10 @@ export async function readyToShow() {
     } else {
         currentwidgetState = false;
     }
-
     Avatar.Interface.refreshWidgetInfo({ plugin: "webradio", id: "444555" });
 }
 
-export async function getNewButtonState(arg) {
+export async function getNewButtonState() {
     return currentwidgetState === true ? "Off" : "On";
 }
 
@@ -135,7 +125,10 @@ export async function getPeriphInfo() {
 export async function widgetAction(even) {
     currentwidgetState = even.value.action === "On" ? true : false;
     if (!WebRadioWindow && even.value.action === "On") return openWebRadioWindow();
-    if (WebRadioWindow && even.value.action === "Off") WebRadioWindow.destroy();
+    if (WebRadioWindow && even.value.action === "Off") {
+        WebRadioWindow.destroy();
+        save_params(false);
+    }
 }
 
 const openWebRadioWindow = async () => {
@@ -145,7 +138,7 @@ const openWebRadioWindow = async () => {
         parent: Avatar.Interface.mainWindow(),
         frame: false,
         movable: true,
-        resizable: true,
+        resizable: false,
         minimizable: false,
         alwaysOnTop: false,
         show: false,
@@ -171,47 +164,15 @@ const openWebRadioWindow = async () => {
 
     WebRadioWindow.once("ready-to-show", () => {
         WebRadioWindow.show();
+        save_params(true);
         WebRadioWindow.webContents.send("onInit-webradio");
         if (Config.modules.webradio.devTools) WebRadioWindow.webContents.openDevTools();
     });
 
     Avatar.Interface.ipcMain().on("webradio-quit", () => {
-        WebRadioWindow.destroy();
-
-        // refresh widget button on window closed
         Avatar.Interface.refreshWidgetInfo({ plugin: "webradio", id: "444555" });
-    });
-
-    Avatar.Interface.ipcMain().on("webradio-position", () => {
-        save_position();
-    });
-
-    Avatar.Interface.ipcMain().handle("webradio-selected", async (_event, arg) => {
-        await save_selected(arg);
+        save_params(false);
         WebRadioWindow.destroy();
-        Avatar.Interface.refreshWidgetInfo({ plugin: "webradio", id: "444555" });
-        openWebRadioWindow();
-    });
-
-    Avatar.Interface.ipcMain().handle("webradio-reload", async (_event, arg) => {
-        WebRadioWindow.destroy();
-        Avatar.Interface.refreshWidgetInfo({ plugin: "webradio", id: "444555" });
-        openWebRadioWindow();
-        return arg;
-    });
-
-    // Liste Radio
-    Avatar.Interface.ipcMain().handle("webradio-liste", async (_event) => {
-        let prop = {};
-        if (fs.existsSync(path.resolve(__dirname, "webradio.prop"))) {
-            prop = fs.readJsonSync(path.resolve(__dirname, "webradio.prop"), {
-                throws: false,
-            });
-        }
-        return {
-            radios: prop.modules.webradio.radios,
-            selection: prop.modules.webradio.selection,
-        };
     });
 
     // Config Radio
@@ -222,177 +183,184 @@ const openWebRadioWindow = async () => {
                 throws: false,
             });
         }
-        return {
-            config: prop.modules.webradio,
-        };
+        return prop.modules.webradio;
     });
 
-
-    // Search Radio
-    Avatar.Interface.ipcMain().handle("webradio-search", async (_event, arg) => {
-        const apiUrl = `https://prod.radio-api.net/stations/search?query=${arg}&count=10&offset=0`;
-        let result = await axios.get(apiUrl);
-        result.headers[("Content-Type", "application/ld+json; charset=utf-8")];
-        return result.data.playables;
-    });
-
-    // Top 100 Radios
+    // Top Radios
     Avatar.Interface.ipcMain().handle("webradio-top", async (_event) => {
-        return await searchTopRadio();
+        return await searchTopRadios();
+    });
+
+    Avatar.Interface.ipcMain().handle("webradio-radio", async (_event) => {
+        return sentenceRadio;
     });
 
     Avatar.Interface.ipcMain().handle("webradio-msg", async (_event, arg) => {
         return Locale.get(arg);
     });
 
-    Avatar.Interface.ipcMain().handle("webradio-status", async (_event, arg) => {
-        statusStartup(arg)
-    })
-
     WebRadioWindow.on("closed", () => {
         currentwidgetState = false;
         Avatar.Interface.ipcMain().removeHandler("webradio-msg");
-        Avatar.Interface.ipcMain().removeHandler("webradio-liste");
         Avatar.Interface.ipcMain().removeHandler("webradio-config");
-        Avatar.Interface.ipcMain().removeHandler("webradio-search");
         Avatar.Interface.ipcMain().removeHandler("webradio-top");
-        Avatar.Interface.ipcMain().removeHandler("webradio-status");
-        Avatar.Interface.ipcMain().removeHandler("webradio-reload");
-        Avatar.Interface.ipcMain().removeHandler("webradio-selected");
-        Avatar.Interface.ipcMain().removeAllListeners("webradio-position");
+        Avatar.Interface.ipcMain().removeHandler("webradio-radio");
         Avatar.Interface.ipcMain().removeAllListeners("webradio-quit");
+        sentenceRadio = [];
         WebRadioWindow = null;
     });
 };
 
-const play = async (data) => {
-    const search_radio = data.tokens ? data.tokens : Config.modules.webradio.selection.radio;
-    const listeRadios = await searchTopRadio();
-    
-    listeRadios.forEach((station) => {
-        let radio = station.name
-            .toLowerCase()
-            .replace(/[^\w\s]/g, "") // Supprimer les caractères spéciaux
-            .split(" ")
-            .filter((word) => word.trim() !== "");
+const setPlay = (data) => {
+    if (!data.action.remote) {
+        const client = Avatar.getTrueClient(data.toClient);
+        const clientInfos = Avatar.Socket.getClient(client);
 
-        evaluateSentence(search_radio, radio)
-            .then((result) => {
-                if (result.similarityScore >= 80) {
-                    let urlRadio = station.url.split("/");
-                        urlRadio = urlRadio[urlRadio.length - 1];
-                              save_selected(urlRadio);
-                              openWebRadioWindow();
-                }
-            })
-            .catch((err) => {
-                console.error(err);
-                
+        if (Config.http.ip === clientInfos.ip) {
+            Avatar.speak(Locale.get("message.launch"), client, () => {
+                openWebRadioWindow();
             });
-    });
-};
-
-const searchTopRadio = async () => {
-    const topUrl = "https://www.radio.fr/top-stations";
-    let result = await axios.get(topUrl);
-    result.headers[("Content-Type", "application/ld+json; charset=utf-8")];
-
-    const $ = cheerio.load(result.data);
-    const obj = $("script[type='application/ld+json']");
-
-    let content = JSON.parse(obj[0].children[0].data);
-    const transformedData = content.itemListElement.map((item) => {
-        return {
-            name: item.name,
-            image: item.image,
-            url: item.url,
-        };
-    });
-
-    transformedData.sort(function (a, b) {
-        if (a.name < b.name) {
-            return -1;
+        } else {
+            Avatar.speak(Locale.get("message.launch"), data.client, () => {
+                data.action.remote = true;
+                Avatar.clientPlugin(client, "webradio", data);
+            });
         }
-        if (a.name > b.name) {
-            return 1;
-        }
-        return 0;
-    });
-    return transformedData;
-};
-
-const save_selected = async (radio) => {
-    let prop = {};
-    if (fs.existsSync(path.resolve(__dirname, "webradio.prop"))) {
-        prop = fs.readJsonSync(path.resolve(__dirname, "webradio.prop"), {
-            throws: false,
-        });
-    }
-    prop.modules.webradio.selection = { radio: radio };
-    fs.writeJsonSync(path.resolve(__dirname, "webradio.prop"), prop);
-};
-
-const statusStartup = async (status) => {
-    let prop = {};
-    if (fs.existsSync(path.resolve(__dirname, "assets", "style.json"))) {
-        prop = fs.readJsonSync(path.resolve(__dirname, "assets", "style.json"), {
-            throws: false,
-        });
-    }
-    prop.start = status;
-    fs.writeJsonSync(path.resolve(__dirname, "assets", "style.json"), prop);
-};
-
-const save_position = async () => {
-    if (WebRadioWindow) {
-        let pos = WebRadioWindow.getPosition();
-        fs.writeJsonSync(path.resolve(__dirname, "assets", "style.json"), {
-            x: pos[0],
-            y: pos[1],
-            start: true,
-        });
     } else {
-        let prop = {};
-        if (fs.existsSync(path.resolve(__dirname, "assets", "style.json"))) {
-            prop = fs.readJsonSync(path.resolve(__dirname, "assets", "style.json"), {
-                throws: false,
-            });
-        }
-        prop.start = false;
-        fs.writeJsonSync(path.resolve(__dirname, "assets", "style.json"), prop);
+        openWebRadioWindow();
     }
 };
 
-const evaluateSentence = async (sentence, search) => {
+const setStop = (data) => {
+    if (!data.action.remote) {
+        const client = Avatar.getTrueClient(data.toClient);
+        const clientInfos = Avatar.Socket.getClient(client);
 
-    const evaluation = {
-        isMatch: false,
-        matchPositions: [],
-        totalSearchElements: search.length,
-        matchingElements: 0,
-        similarityScore: 0,
-    };
+        if (Config.http.ip === clientInfos.ip) {
+            Avatar.speak(Locale.get("message.stopradio"), client, () => {
+                WebRadioWindow.destroy();
+            });
+        } else {
+            Avatar.speak(Locale.get("message.stopradio"), data.client, () => {
+                data.action.remote = true;
+                Avatar.clientPlugin(client, "webradio", data);
+            });
+        }
+    } else {
+        WebRadioWindow.destroy();
+    }
+};
 
-    // Convertir les éléments en minuscules
-    const sentenceLower = sentence.map((word) => word.toLowerCase());
-    const searchLower = search.map((word) => word.toLowerCase());
+const searchTopRadios = async () => {
+    const nbradio = Config.modules.webradio.search.nbradio;
+    const radioStart = Config.modules.webradio.selection.radio;
 
-    for (let i = 0; i <= sentenceLower.length - searchLower.length; i++) {
-        let match = true;
-        for (let j = 0; j < searchLower.length; j++) {
-            if (sentenceLower[i + j] !== searchLower[j]) {
-                match = false;
-                break;
+    try {
+        const apiUrl = `https://de1.api.radio-browser.info/json/stations/bycountry/france?countrycode=FR&order=clickcount&reverse=true`;
+        let result = await axios.get(apiUrl);
+
+        // Filtrer les radios pour ne garder que celles avec une image
+        const stations = result.data.filter((radio) => radio.favicon && radio.favicon.trim() !== "");
+
+        // Trier les stations par popularité (votes)
+        const sortedStations = stations.sort((a, b) => b.votes - a.votes);
+
+        // Supprimer les doublons (basé sur le nom de la radio)
+        const uniqueStations = [];
+        const seenNames = new Set();
+
+        for (const station of sortedStations) {
+            if (!seenNames.has(station.name)) {
+                seenNames.add(station.name);
+                uniqueStations.push(station);
             }
         }
-        if (match) {
-            evaluation.isMatch = true;
-            evaluation.matchingElements = searchLower.length;
-            evaluation.matchPositions = Array.from({ length: searchLower.length }, (_, index) => i + index);
-            break;
+
+        const topStations = uniqueStations.slice(0, nbradio);
+        const sortedByName = topStations.sort((a, b) => a.name.localeCompare(b.name));
+
+        const resultat = sortedByName.map((station) => ({
+            name: station.name,
+            genre: station.tags.split(",").slice(0, 2).join(" - ") ? station.tags.split(",").slice(0, 2).join(" - ") : " Aucune info ",
+            audio_stream: station.url,
+            audio_stream_resolved: station.url_resolved,
+            cover_art_url: station.favicon ? station.favicon : path.resolve(__dirname, "assets", "images", "webradio.png"),
+        }));
+
+        const StationFavori = Config.modules.webradio.selection.favoris;
+
+        if (StationFavori.length) {
+            for (let i = 0; i < StationFavori.length; i++) {
+                const element = StationFavori[i];
+
+                // Rechercher les radios dans les favoris fichier prop
+                const stationUrl = `http://de1.api.radio-browser.info/json/stations/search?name=${element}&country=France&limit=1`;
+                const stationResult = await axios.get(stationUrl);
+
+                // Si des résultats sont trouvés, les ajouter à `resultat`
+                if (stationResult.data.length > 0) {
+                    const stationResultat = stationResult.data[0];
+                    const formattedStation = {
+                        name: stationResultat.name,
+                        genre: stationResultat.tags.split(",").slice(0, 2).join(" - ") ? stationResultat.tags.split(",").slice(0, 2).join(" - ") : " Aucune info ",
+                        audio_stream: stationResultat.url,
+                        audio_stream_resolved: stationResultat.url_resolved,
+                        cover_art_url: stationResultat.favicon ? stationResultat.favicon : path.resolve(__dirname, "assets", "images", "webradio.png"),
+                    };
+                    resultat.push(formattedStation);
+                }
+            }
         }
+
+        // Rechercher la station correspondante à radioStart (insensible à la casse)
+        const selectedStation = uniqueStations.find((station) => station.name.toLowerCase() === radioStart.toLowerCase());
+
+        const radioStartInfo = selectedStation
+            ? {
+                  name: selectedStation.name,
+                  genre: selectedStation.tags.split(",").slice(0, 2).join(" - ") ? selectedStation.tags.split(",").slice(0, 2).join(" - ") : " Aucune info ",
+                  audio_stream: selectedStation.url,
+                  audio_stream_resolved: selectedStation.url_resolved,
+                  cover_art_url: selectedStation.favicon ? selectedStation.favicon : path.resolve(__dirname, "assets", "images", "webradio.png"),
+              }
+            : null;
+
+        return { resultat: resultat, radioStart: radioStartInfo };
+    } catch (err) {
+        return { error: Locale.get("error.error") };
+    }
+};
+
+const save_params = async (start) => {
+    const styleFilePath = path.resolve(__dirname, "assets", "style.json");
+    let style = {};
+
+    if (fs.existsSync(styleFilePath)) {
+        style = fs.readJsonSync(styleFilePath, { throws: false }) || {};
     }
 
-    evaluation.similarityScore = (evaluation.matchingElements / evaluation.totalSearchElements) * 100;
-    return evaluation;
+    if (WebRadioWindow) {
+        const [x, y] = WebRadioWindow.getPosition();
+        style = { ...style, x, y, start };
+    } else {
+        style.start = start;
+    }
+
+    fs.writeJsonSync(styleFilePath, style);
+};
+
+const compareSearchRadio = async (searchRadio, listeRadios) => {
+    sentenceRadio = [];
+    let resultRadio = searchRadio.join(" ").toLowerCase();
+    for (let i = 0; i < listeRadios.length; i++) {
+        if (resultRadio == listeRadios[i].name.toLowerCase()) {
+            sentenceRadio.push({
+                name: listeRadios[i].name,
+                genre: listeRadios[i].genre,
+                audio_stream: listeRadios[i].audio_stream,
+                cover_art_url: listeRadios[i].cover_art_url,
+            });
+        }
+    }
+    return sentenceRadio;
 };
