@@ -1,56 +1,167 @@
 {
-    "modules": {
-        "webradio": {
-            "version": "2.3.0",
-            "name": "webradio",
-            "devices": {},
-            "clients": {
-                "Salon": "Salon"
-            },
-            "rules": {
-                "play": [
-                    "(~put~|~play~) the? radio",
-                    "listen to? the? radio"
-                ],
-                "stop": [
-                    "(~stop~|~cut~) the? radio"
-                ]
-            },
-            "widget": {
-                "display": true,
-                "autoUpdate": {
-                    "delay": 30,
-                    "start": false
-                },
-                "font": {
-                    "status": 8,
-                    "title": 12,
-                    "value": 10,
-                    "position": "bottom"
-                },
-                "latency": 0,
-                "latency_macro": 0,
-                "opacity": 0.7,
-                "borderWidth": 5,
-                "size": 40,
-                "color": "rgba(107, 101, 99, 1)",
-                "textColor": "rgba(255, 255, 255, 1)"
-            },
-            "window": {
-                "width": 375,
-                "height": 138,
-                "opacity": 1
-            },
-            "devTools": false,
-            "notification": 3000,
-            "active": true,
-            "selection": {
-                "radio": "fun radio",
-                "favoris": ["rire et chanson", "nrj"]
-            },
-            "search": {
-                "nbradio": 75
-            }
+  "modules": {
+    "webradio": {
+      "version": "3.0.0",
+      "name": "webradio",
+      "lang": "fr-FR",
+      "onServer": false,
+
+      "rules": {
+        "playLast": [
+          "{put} * last radio",
+          "{put} * latest radio",
+          "{play} * last radio"
+        ],
+        "play": [
+          "{put} * radio",
+          "{play} * radio",
+          "{start} * radio",
+          "{change} * radio"
+        ],
+        "playGroup": [
+          "{put} * radio * rooms",
+          "{play} * radio * positions",
+          "{change} * radio * every? rooms"
+        ],
+        
+        "stop": [
+          "{stop} * radio",
+          "{pause} * radio"
+        ],
+        "stopGroup": [
+          "{stop} * radio * rooms",
+          "{pause} * radio * every? rooms"
+        ],
+        "alarmClock": [
+          "{put} * alarm clock",
+          "{put} * alarm clock * radio",
+          "{put} * awakening"
+        ]
+      },
+      "player": {
+        "radio": "FUN Radio",
+        "favoris": [
+          "rire et chanson",
+          "nrj",
+          "Kiss FM (de Toulon à Marseille)",
+          "C9"
+        ],
+        "nbradio": 75
+      },
+      "search": {
+        "fr": {
+          "correspondance": "musicMapping",
+          "ajoute une correspondance": "musicMapping",
+          "comme tu veux": "musicRandom",
+          "fais-toi plaisir": "musicRandom",
+          "terminer": "done"
         }
+      },
+      "dialogues": {
+        "waitForAnswer": 15,
+        "days": {
+          "fr-FR": [
+            "lundi",
+            "mardi",
+            "mercredi",
+            "jeudi",
+            "vendredi",
+            "samedi",
+            "dimanche"
+          ],
+          "en-EN": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday"
+          ]
+        },
+        "searchRadio": {
+          "fr-FR": "Veux tu que je recherche la radio ",
+          "en-EN": "I'm sorry, I can't help you."
+        },
+        "noResponse": {
+          "fr-FR": "Je suis désolé, je ne peux pas vous aider",
+          "en-EN": "I'm sorry, I can't help you."
+        },
+        "noAskmeResponse": {
+          "fr-FR": "terminé|d'accord",
+          "en-EN": "completed|finished|agreed"
+        },
+        "askmeResponse": {
+          "fr-FR": {
+            "*": "tts_answer",
+            "genre": "genre",
+            "stop la conversation": "cancel",
+            "terminer": "cancel"
+          },
+          "en-EN": {
+            "*": "tts_answer",
+            "genre": "genre",
+            "stop the conversation": "cancel",
+            "finish": "cancel",
+            "complete": "cancel",
+            "end": "cancel"
+          }
+        },
+        "saveFavoris": {
+          "fr-FR": "Veux tu sauvegarder la radio dans la liste des favoris ?",
+          "en-EN": "Do you want to save the radio in the favorites list ?"
+        },
+        "askmeSaveRadioFavoris": {
+          "fr-FR": {
+            "*": "tts_answer",
+            "stop la conversation": "cancel",
+            "quitter": "cancel",
+            "terminer": "cancel"
+          },
+          "en-EN": {
+            "*": "tts_answer",
+            "stop the conversation": "cancel",
+            "finish": "cancel",
+            "exit": "cancel",
+            "complete": "cancel",
+            "end": "cancel"
+          }
+        }
+      },
+      "widget": {
+        "display": true,
+        "autoUpdate": {
+          "delay": 30,
+          "start": false
+        },
+        "font": {
+          "status": 8,
+          "title": 12,
+          "value": 10,
+          "position": "bottom"
+        },
+        "latency": 0,
+        "latency_macro": 0,
+        "opacity": 0.7,
+        "borderWidth": 5,
+        "size": 40,
+        "color": "rgba(107, 101, 99, 1)",
+        "textColor": "rgba(255, 255, 255, 1)"
+      },
+      "window": {
+        "width": 375,
+        "height": 138,
+        "opacity": 1
+      },
+      "devTools": false,
+      "active": true,
+      "nlpPosition": 1
     }
+  },
+  "cron": {
+    "webradio": {
+      "name": "webradio",
+      "time": "0 10 * * 2"
+    }
+  }
 }

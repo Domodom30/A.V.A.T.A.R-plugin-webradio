@@ -1,11 +1,27 @@
 {
-    "message": {
-        "launch": "Je lance la radio",
-        "launch-client": "Je lance la radio sur le client $$",
-        "stopradio": "J'arrête la radio"
-    },
-    "error": {
-        "noradio": "je suis désolé, je n'ai pas trouvé la radio",
+    "player": {
+        "yes": "oui",
+        "no": "non",
+        "openRadio": "Je lance la radio $$ dans la pièce $$",
+        "openRadioAllRoom" : "Je lance la radio $$ dans toutes les pièces.",
+        "openRadioGenre": "Je lance la radio avec le tag : $$ ",
+        "stopRadio": "J'ai arrêté la radio dans la pièce $$|J'ai coupé la radio dans la pièce $$",
+        "radioNoMobile" : "je ne peux peux pas démarrer le player radio sur un client mobile"
+	},
+    "music": {
+		"askme": "Que veux tu écouter ?|Quelle radio veux tu écouter ?|Quelle style ou radio veux tu écouter",
+		"done": "Terminé",
+		"notFound": "Je suis désolé, je n'ai pas trouvé ce que tu demandes.",
+		"found": "Je mets $$",
+        "noTag": "Aucune Info",
+		"noradio": "je suis désolé, je n'ai pas trouvé la radio",
         "error": "Une erreur s'est produite lors de la récupération des données."
-    }
+	},
+	"alarm": {
+		"cron": "Je planifie une tache pour lançer la radio à $$",
+		"askmeTime": "A quelle heure veux tu mettre le réveil ?",
+		"askmeDays": "Pour quels jours ?",
+		"finish": "Terminé",
+		"error": "Une erreur s'est produite.|Je ne peux pas éxécuter cette tache"
+	}
 }
