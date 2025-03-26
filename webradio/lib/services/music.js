@@ -1,247 +1,253 @@
-import * as path from "node:path";
-import * as url from "url";
-import fs from "fs-extra";
-import axios from "axios";
+import * as path from 'node:path';
+import * as url from 'url';
+import fs from 'fs-extra';
+import axios from 'axios';
+import { webRadioAPI } from './services.js';
+import { musicMapping } from './helpers.js';
 
-const __dirname = url.fileURLToPath(new URL("../../", import.meta.url));
+import * as radiobrowser from '../radio-browser.js';
+
+const __dirname = url.fileURLToPath(new URL('../../', import.meta.url));
+const API = new webRadioAPI(Config.modules.webradio.mappingRules);
+const BASE_API_URL = (await radiobrowser.get_radiobrowser_base_url_random()) + '/json/stations';
 
 class MusicManager {
-    constructor() {
-        this.listeRadios = [];
-    }
+   constructor() {
+      this.listeRadios = [];
+      this.configPath = path.resolve(__dirname, 'webradio.prop');
+   }
 
-    async searchTopRadios() {
-        const nbradio = Config.modules.webradio.player.nbradio;
-        const Locale = await Avatar.lang.getPak("webradio", Config.language);
-        try {
-            const apiUrl = `https://de1.api.radio-browser.info/json/stations/bycountry/france?countrycode=FR&order=clickcount&reverse=true&limit=${nbradio}`;
-            let result = await axios.get(apiUrl);
+   async getLocale() {
+      return await Avatar.lang.getPak('webradio', Config.language);
+   }
 
-            const stations = result.data.filter((radio) => radio.favicon && radio.favicon.trim() !== "");
-            const sortedStations = stations.sort((a, b) => b.votes - a.votes);
+   formatStation(station, defaultImagePath, Locale) {
+      return {
+         name: station.name,
+         genre: station.tags.split(',').slice(0, 2).join(' - ') || Locale.get('music.noTag'),
+         audio_stream: station.url,
+         audio_stream_resolved: station.url_resolved,
+         cover_art_url: station.favicon || defaultImagePath,
+      };
+   }
 
-            const uniqueStations = [];
-            const seenNames = new Set();
+   async searchTopRadios() {
+      const { nbradio, favoris } = Config.modules.webradio.player;
+      const Locale = await this.getLocale();
+      const defaultImagePath = path.resolve(__dirname, 'assets', 'images', 'webradio.png');
 
-            for (const station of sortedStations) {
-                if (!seenNames.has(station.name)) {
-                    seenNames.add(station.name);
-                    uniqueStations.push(station);
-                }
+      try {
+         // Get top radios by click count
+         const apiUrl = `${BASE_API_URL}/bycountry/france?countrycode=FR&order=clickcount&reverse=true&limit=${nbradio}`;
+         const { data: stations } = await axios.get(apiUrl);
+
+         // Process and filter stations
+         const filteredStations = stations.filter((radio) => radio.favicon && radio.favicon.trim() !== '').sort((a, b) => b.votes - a.votes);
+
+         // Remove duplicates
+         const uniqueStations = [];
+         const seenNames = new Set();
+
+         for (const station of filteredStations) {
+            if (!seenNames.has(station.name)) {
+               seenNames.add(station.name);
+               uniqueStations.push(station);
             }
+         }
 
-            const sortedByName = uniqueStations.sort((a, b) => a.name.localeCompare(b.name));
-            const resultat = sortedByName.map((station) => ({
-                name: station.name,
-                genre: station.tags.split(",").slice(0, 2).join(" - ") || Locale.get("music.noTag"),
-                audio_stream: station.url,
-                audio_stream_resolved: station.url_resolved,
-                cover_art_url: station.favicon || path.resolve(__dirname, "assets", "images", "webradio.png"),
-            }));
+         // Sort by name and format
+         const resultat = uniqueStations.sort((a, b) => a.name.localeCompare(b.name)).map((station) => this.formatStation(station, defaultImagePath, Locale));
 
-            const StationFavori = Config.modules.webradio.player.favoris;
+         // Add favorite stations
+         if (favoris.length) {
+            const favoriteStations = await Promise.all(
+               favoris.map(async (stationName) => {
+                  const stationUrl = `${BASE_API_URL}/search?name=${stationName}&country=France&limit=1`;
+                  const { data } = await axios.get(stationUrl);
 
-            if (StationFavori.length) {
-                for (let element of StationFavori) {
-                    const stationUrl = `http://de1.api.radio-browser.info/json/stations/search?name=${element}&country=France&limit=1`;
-                    const stationResult = await axios.get(stationUrl);
+                  if (data.length > 0) {
+                     return this.formatStation(data[0], defaultImagePath, Locale);
+                  }
+                  return null;
+               })
+            );
 
-                    if (stationResult.data.length > 0) {
-                        const stationResultat = stationResult.data[0];
-                        const formattedStation = {
-                            name: stationResultat.name,
-                            genre: stationResultat.tags.split(",").slice(0, 2).join(" - ") || Locale.get("music.noTag"),
-                            audio_stream: stationResultat.url,
-                            audio_stream_resolved: stationResultat.url_resolved,
-                            cover_art_url: stationResultat.favicon || path.resolve(__dirname, "assets", "images", "webradio.png"),
-                        };
-                        resultat.push(formattedStation);
-                    }
-                }
+            // Add non-null stations to the result
+            resultat.push(...favoriteStations.filter(Boolean));
+         }
+
+         return resultat;
+      } catch (err) {
+         error('Erreur lors de la recherche des stations radio');
+         return [];
+      }
+   }
+
+   async searchWebRadio(element) {
+      try {
+         const Locale = await this.getLocale();
+         const defaultImagePath = path.resolve(__dirname, 'assets', 'images', 'webradio.png');
+
+         // Normalize element to remove accents
+         const normalizedElement = element.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+         const stationUrl = `${BASE_API_URL}/search?name=${normalizedElement}&country=France&limit=1`;
+         const { data } = await axios.get(stationUrl);
+
+         if (data.length > 0) {
+            return [this.formatStation(data[0], defaultImagePath, Locale)];
+         }
+
+         return [];
+      } catch (err) {
+         console.error('Error in searchWebRadio:', err);
+         return [];
+      }
+   }
+
+   async search(data, listeRadios, searchRadio) {
+      const askmeKeys = { '*': 'generic', ...Config.modules.webradio['search'][data.language] };
+
+      return new Promise((resolve) => {
+         Avatar.askme(data.Locale.get('music.askme'), data.client, askmeKeys, 15, async (answer, end) => {
+            end(data.client);
+
+            if (answer && answer.includes('generic')) {
+               const searchTerm = answer.split(':')[1];
+               const normalizedSearch = API.searchCorrespondence(searchTerm);
+               const responseRadio = await this.compareSearchRadio(data, listeRadios, normalizedSearch);
+               resolve(responseRadio);
+            } else {
+               switch (answer) {
+                  case 'musicMapping':
+                     await musicMapping.launchWindowClient(data, searchRadio, this.listeRadiosToObject(listeRadios));
+                     Avatar.speak(data.Locale.get('music.doMapping'), data.client);
+                     break;
+                  case 'done':
+                  default:
+                     Avatar.speak('Terminé', data.client);
+                     resolve(null);
+               }
             }
-            return resultat;
-        } catch (err) {
-            console.log(err);
-        }
-    }
+         });
+      });
+   }
 
-    async searchWebRadio(element) {
-        let resultat = [];
-        const Locale = await Avatar.lang.getPak("webradio", Config.language);
+   async searchAdv(data, searchRadio) {
+      const Locale = await this.getLocale();
+      const askmeKeys = { ...Config.modules.webradio['search'][data.language] };
 
-        const stationUrl = `http://de1.api.radio-browser.info/json/stations/search?name=${element}&country=France&limit=1`;
-        const stationResult = await axios.get(stationUrl);
+      return new Promise((resolve) => {
+         Avatar.askme(Locale.get('music.askmeAdv'), data.client, askmeKeys, 15, async (answer, end) => {
+            end(data.client);
 
-        if (stationResult.data.length > 0) {
-            const stationResultat = stationResult.data[0];
-            const formattedStation = {
-                name: stationResultat.name,
-                genre: stationResultat.tags.split(",").slice(0, 2).join(" - ") || Locale.get("music.noTag"),
-                audio_stream: stationResultat.url,
-                audio_stream_resolved: stationResultat.url_resolved,
-                cover_art_url: stationResultat.favicon || path.resolve(__dirname, "assets", "images", "webradio.png"),
-            };
-            resultat.push(formattedStation);
-        }
-        return resultat;
-    }
+            switch (answer) {
+               case 'search':
+                  const response = await this.searchWebRadio(searchRadio);
+                  resolve(response);
+                  break;
+               case 'musicMapping':
+                  await musicMapping(data);
+                  Avatar.speak(data.Locale.get('music.doMapping'), data.client);
+                  break;
+               case 'done':
+               default:
+                  Avatar.speak('Terminé', data.client);
+                  resolve(null);
+            }
+         });
+      });
+   }
 
-    async search(data, listeRadios) {
-        const askmeKeys = { "*": "generic", ...Config.modules.webradio["search"][data.language] };
+   async compareSearchRadio(data, listeRadios, searchRadio) {
+      try {
+         const searchTerm = searchRadio.toLowerCase();
 
-        return new Promise((resolve) => {
-            Avatar.askme(data.Locale.get("music.askme"), data.client, askmeKeys, 15, async (answer, end) => {
-                end(data.client);
+         // Case-insensitive and partial matching
+         const matchingRadios = listeRadios.filter((radio) => radio.name.toLowerCase().includes(searchTerm));
 
-                if (answer && answer.includes("generic")) {
-                    const answerResponse = answer.split(":")[1];
-                    if (answerResponse.includes("genre")) {
-                        const responseGenre = answerResponse.split("genre")[1].trim();
-
-                        const responseRadio = await this.compareSearchRadiobyGenre(data, listeRadios, responseGenre);
-                        if (responseRadio) {
-                            resolve(responseRadio);
-                        }
-                    } else {
-                        const responseRadio = await this.compareSearchRadio(data, listeRadios, answerResponse);
-                        resolve(responseRadio);
-                    }
-                } else {
-                    switch (answer) {
-                        case "radioMapping":
-                            break;
-                        case "done":
-                        default:
-                            Avatar.speak("Terminé", data.client);
-                            resolve(null);
-                    }
-                }
+         // No radio found
+         if (!matchingRadios || matchingRadios.length === 0) {
+            return new Promise((resolve) => {
+               Avatar.speak(
+                  data.Locale.get('music.notFound'),
+                  data.client,
+                  () => {
+                     resolve(this.search(data, listeRadios, searchRadio));
+                  },
+                  false
+               );
             });
-        });
-    }
+         }
 
-    async compareSearchRadio(data, listeRadios, searchRadio) {
-        try {
-            const searchTerm = searchRadio.toLowerCase();
-            const matchingRadios = listeRadios.filter((radio) => radio.name.toLowerCase() === searchTerm);
+         // Select a random radio if multiple matches
+         const selectedRadio = matchingRadios.length > 1 ? matchingRadios[Math.floor(Math.random() * matchingRadios.length)] : matchingRadios[0];
 
-            if (matchingRadios.length === 0) {
-                Avatar.speak(
-                    data.Locale.get("music.notFound"),
-                    data.client,
-                    () => {
-                        this.search(data, listeRadios, searchRadio);
-                    },
-                    false
-                );
-                return;
-            }
+         return {
+            name: selectedRadio.name,
+            genre: selectedRadio.genre,
+            audio_stream: selectedRadio.audio_stream,
+            cover_art_url: selectedRadio.cover_art_url,
+         };
+      } catch (error) {
+         console.error('Error in compareSearchRadio:', error);
+         return null;
+      }
+   }
 
-            if (matchingRadios.length > 1) {
-                Avatar.speak(
-                    `J'ai trouvé plusieurs radios ${searchRadio}.`,
-                    data.client,
-                    () => {
-                        this.search(data, listeRadios, searchRadio);
-                    },
-                    false
-                );
-                return;
-            }
+   async compareSearchRadiobyGenre(data, listeRadios, searchGenre) {
+      try {
+         const searchTerm = searchGenre.toLowerCase();
+         return listeRadios.filter((radio) => radio.genre.toLowerCase().includes(searchTerm));
+      } catch (error) {
+         console.error('Error in compareSearchRadiobyGenre:', error);
+         return [];
+      }
+   }
 
-            return {
-                name: matchingRadios[0].name,
-                genre: matchingRadios[0].genre,
-                audio_stream: matchingRadios[0].audio_stream,
-                cover_art_url: matchingRadios[0].cover_art_url,
-            };
-        } catch (error) {
-            console.error("Erreur dans compareSearchRadio :", error);
-            throw error;
-        }
-    }
+   updateConfig(updateFn) {
+      try {
+         let config = {};
 
-    async compareSearchRadiobyGenre(data, listeRadios, searchGenre) {
-        
-        try {
-            const searchTerm = searchGenre.toLowerCase();
-            const matchingRadios = listeRadios.filter((radio) => radio.genre.toLowerCase() === searchTerm);
-            
-
-    return listeRadios.filter(radio => {
-        const radioGenreLower = radio.genre.toLowerCase();
-        return radioGenreLower.includes(searchTerm);
-    });
-
-
-
-            if (matchingRadios.length === 0) {
-                Avatar.speak(
-                    data.Locale.get("music.notFound"),
-                    data.client,
-                    () => {
-                        this.search(data, listeRadios, searchGenre);
-                    },
-                    false
-                );
-                return;
-            }
-
-            if (matchingRadios.length > 1) {
-                Avatar.speak(
-                    `J'ai trouvé plusieurs radios ${searchGenre}.`,
-                    data.client,
-                    () => {
-                        this.search(data, listeRadios, searchGenre);
-                    },
-                    false
-                );
-                return;
-            }
-
-            return {
-                name: matchingRadios[0].name,
-                genre: matchingRadios[0].genre,
-                audio_stream: matchingRadios[0].audio_stream,
-                cover_art_url: matchingRadios[0].cover_art_url,
-            };
-        } catch (error) {
-            console.error("Erreur dans compareSearchRadio :", error);
-            throw error;
-        }
-    }
-
-    saveRadioFavoris(nameRadio) {
-        const configPath = path.resolve(__dirname, "webradio.prop");
-        let config = {};
-
-        if (fs.existsSync(configPath)) {
-            const fileContent = fs.readFileSync(configPath, "utf8");
+         if (fs.existsSync(this.configPath)) {
+            const fileContent = fs.readFileSync(this.configPath, 'utf8');
             config = JSON.parse(fileContent);
-        }
-        let favoris = config.modules.webradio.player.favoris;
-        favoris.push(nameRadio);
+         }
 
-        config.modules.webradio.player.favoris = favoris;
+         updateFn(config);
 
-        fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
-    }
+         fs.writeFileSync(this.configPath, JSON.stringify(config, null, 2));
+         return true;
+      } catch (error) {
+         console.error('Error updating config:', error);
+         return false;
+      }
+   }
 
-    saveRadio(nameRadio) {
-        if (!nameRadio) {
-            return;
-        }
-        const propFilePath = path.resolve(__dirname, "webradio.prop");
-        let config = {};
+   saveRadioFavoris(nameRadio) {
+      return this.updateConfig((config) => {
+         const favoris = config.modules.webradio.player.favoris || [];
+         if (!favoris.includes(nameRadio)) {
+            favoris.push(nameRadio);
+            config.modules.webradio.player.favoris = favoris;
+         }
+      });
+   }
 
-        if (fs.existsSync(propFilePath)) {
-            const fileContent = fs.readFileSync(propFilePath, "utf8");
-            config = JSON.parse(fileContent);
-        }
+   listeRadiosToObject(radios) {
+      return radios.reduce((acc, radio) => {
+         acc[radio.name] = [];
+         return acc;
+      }, {});
+   }
 
-        config.modules.webradio.player.radio = nameRadio;
+   saveRadio(nameRadio) {
+      if (!nameRadio) return false;
 
-        fs.writeFileSync(propFilePath, JSON.stringify(config, null, 2));
-    }
+      return this.updateConfig((config) => {
+         config.modules.webradio.player.radio = nameRadio;
+      });
+   }
 }
+
 export const radioMusic = new MusicManager();

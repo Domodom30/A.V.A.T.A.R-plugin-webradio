@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' ; style-src 'self' 'unsafe-inline'; style-src-elem 'self'">
+  <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
+
+  <script src="../../../../../node_modules/xel/xel.js" type="module"></script>
+  <meta name="xel-theme" content="../../../../../node_modules/xel/themes/adwaita-dark.css">
+  <meta name="xel-accent-color" content="blue">
+  <meta name="xel-icons" content="">
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div id="title" class="logo"></div>
+    <div id="notification" class="notification hidden"></div>
+  </header>
+
+  <main class="content">
+    <div class="container">
+      <x-card class="hidden" id="calendar-infos">
+        <x-box style="display: flex; justify-content: center;">
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <x-input id="inputsecondes" size="small" style="width: 40px; margin-top: 0px;" value="*" required></x-input>
+            <x-label>sec</x-label>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;">
+            <x-input id="inputminutes" size="small" style="width: 40px; margin-top: 0px;" value="*" required></x-input>
+            <x-label class="detail">min</x-label>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <x-input id="inputhours" size="small" style="width: 40px; margin-top: 0px;" value="*" required></x-input>
+            <x-label class="detail">hr</x-label>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <x-input id="inputmonthdays" size="small" style="width: 40px; margin-top: 15px;" value="*"
+              required></x-input>
+            <x-label class="detail"
+              style="display: flex; align-items: center; justify-content: center; text-align: center; width: 50px; white-space: normal; word-wrap: break-word;">day
+              (month)</x-label>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <x-input id="inputmonths" size="small" style="width: 40px; margin-top: 0px;" value="*" required></x-input>
+            <x-label class="detail">month</x-label>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; margin-left: 5px; margin-top: 15px;">
+            <x-input id="inputweekdays" size="small" style="width: 90px; margin-top: 0px;" value="*" required></x-input>
+            <x-label class="detail"
+              style="display: flex; align-items: center; justify-content: center; text-align: center; width: 50px; white-space: normal; word-wrap: break-word;">day
+              (week)</x-label>
+          </div>
+
+          <div
+            style="display: flex; flex-direction: column; align-items: center; margin-left: 85px; margin-top: -12px;">
+            <x-switch id="activeCron" size="small"><x-label id="label-active-cron">Activer le cron</x-label></x-switch>
+          </div>
+        </x-box>
+
+        <!-- <x-box>
+          <x-box>
+            <x-label id="clientFromLabel">Le client qui envoie la tâche:</x-label>
+          </x-box>
+          <x-select style="margin-left:5px; max-width: 180px; width: 150px;" size="small">
+            <x-menu id="clientFrom">
+              <x-menuitem id="select-clientFrom" value="choose-client" class="clientFrom" toggled><x-label
+                  id="select-clientFrom-label">Select...</x-label></x-menuitem>
+              <hr>
+            </x-menu>
+          </x-select>
+          <x-box>
+            <x-label id="clientToLabel">Le client qui exécute la tâche:</x-label>
+          </x-box>
+
+          <x-select style="margin-left:5px; max-width: 180px; width: 150px;" size="small">
+            <x-menu id="clientTo">
+              <x-menuitem id="select-clientTo" value="choose-client" class="clientTo" toggled><x-label
+                  id="select-clientTo-label">Select...</x-label></x-menuitem>
+              <hr>
+            </x-menu>
+          </x-select>
+        </x-box>
+        <x-box>
+          <x-label id="clientFromLabel" class="label-information">Par défaut, le client qui envoie la
+            tâche est le client qui l'exécute.</x-label>
+        </x-box> -->
+
+
+        <x-box>
+          <table style="margin-top: 10px; border-collapse: collapse; font-size: 11px;">
+            <tr>
+              <td style="width: 120px;">0 to 59</td>
+              <td style="width: 500px;">fixed second/minute value</td>
+            </tr>
+            <tr>
+              <td>0 to 23</td>
+              <td style="width: 500px;">fixed hour value</td>
+            </tr>
+            <tr>
+              <td>1 to 31</td>
+              <td style="width: 500px;">fixed day of month value</td>
+            </tr>
+            <tr>
+              <td>1 to 12</td>
+              <td style="width: 500px;">fixed month value</td>
+            </tr>
+            <tr>
+              <td>1 to 7</td>
+              <td style="width: 500px;">fixed day of week value (start to Monday (1))</td>
+            </tr>
+            <tr>
+              <td>*</td>
+              <td style="width: 500px;">any value</td>
+            </tr>
+            <tr>
+              <td>,</td>
+              <td style="width: 500px;">value list separator (e.g. 3,5,10)</td>
+            </tr>
+            <tr>
+              <td>-</td>
+              <td style="width: 500px;">range of values (e.g. 1-3)</td>
+            </tr>
+            <tr>
+              <td>*/val</td>
+              <td style="width: 500px;">step values (e.g. */2)</td>
+            </tr>
+          </table>
+        </x-box>
+      </x-card>
+    </div>
+  </main>
+
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <!-- <div class="notification-container">
+        <x-label id="txtCron" class="notification">
+      </div> -->
+
+    </div>
+    <div class="footer-buttons">
+      <button type="button" id="save" class="button button-save">Enregistrer</button>
+      <button type="button" id="close" class="button button-close">Fermer</button>
+    </div>
+  </footer>
+
+  <!-- <x-notification id="notification"></x-notification> -->
+  <script src="./alarm-renderer.js"></script>
+</body>
+
+</html>

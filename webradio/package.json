@@ -10,6 +10,9 @@
     "author": "Eddy TELLIER",
     "license": "mit",
     "dependencies": {
-
+        "@jollie/soundex-fr": "^1.0.8",
+        "axios": "^1.8.3",
+        "soundex-code": "^2.0.1",
+        "talisman": "^1.1.4"
     }
 }

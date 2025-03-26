@@ -96,32 +96,41 @@ const setListeRadios = async () => {
 };
 
 const findAndPlaySong = (infosRadio) => {
-    if (!infosRadio || !infosRadio.length) {
-        console.error("No radio info provided");
+    if (!infosRadio || (!Array.isArray(infosRadio) && !infosRadio.length)) {
+        console.error("No valid radio info provided");
         return;
     }
 
-    const songNameToFind = infosRadio[0].name || infosRadio; // Nom de la chanson à trouver
-    const playlistSongs = document.querySelectorAll(".white-player-playlist-song"); // Sélectionner tous les éléments de la playlist
+    // Normalisation du nom à rechercher
+    const songNameToFind = (Array.isArray(infosRadio) ? infosRadio[0]?.name : infosRadio)?.trim().toLowerCase();
+    
+    if (!songNameToFind) {
+        console.error("Invalid song name");
+        return;
+    }
+
+    const playlistSongs = document.querySelectorAll(".white-player-playlist-song");
 
     let songFound = false;
 
     playlistSongs.forEach((playlistSong, index) => {
-        // Trouver l'élément contenant le nom de la chanson
         const songNameElement = playlistSong.querySelector(".playlist-song-name");
-
-        if (songNameElement && songNameElement.textContent === songNameToFind) {
-            // Jouer la chanson à l'index correspondant
-            Amplitude.playSongAtIndex(index);
-            window.electronAPI.saveRadio(songNameToFind);
-            songFound = true;
+        
+        if (songNameElement) {
+            const currentSongName = songNameElement.textContent.trim().toLowerCase();
+            
+            if (currentSongName === songNameToFind) {
+                Amplitude.playSongAtIndex(index);
+                window.electronAPI.saveRadio(songNameToFind);
+                songFound = true;
+            }
         }
     });
 
     if (!songFound) {
         console.error(`Aucune chanson trouvée avec le nom : ${songNameToFind}`);
     }
-};
+}
 
 window.electronAPI.onInitWebRadio(async (infosRadio) => {
     await setListeRadios();

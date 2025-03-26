@@ -1,0 +1,65 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' ; style-src 'self' 'unsafe-inline'">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
+    <script src="../../../../../node_modules/xel/xel.js" type="module"></script>
+    <meta name="xel-theme" content="../../../../../node_modules/xel/themes/adwaita-dark.css">
+    <meta name="xel-accent-color" content="blue">
+    <meta name="xel-icons" content="../../../../../node_modules/xel/icons/fluent.svg">
+    <link href="../../../../../assets/html/css/base.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <header>
+        <h4 id="window-title"></h4>
+    </header>
+    <main>
+        <x-card id="xcard-mapping">
+            <x-box><strong id="youSay-title"></strong></x-box>
+            <x-box>
+                <x-input id="youSay" size="small" class="max-width-350">
+                    <x-label id="youSay-label"></x-label>
+                </x-input>
+            </x-box>
+        </x-card>
+
+        <x-card id="xcard-mapping">
+            <x-box><strong id="mapping-title"></strong></x-box>
+            <x-box>
+                <x-label id="mapping-label"></x-label>
+                <x-select id="select-mapping" size="small" class="max-width-150">
+                    <x-menu id="menu-mapping">
+                        <x-menuitem id="L-auto" value="auto"><x-label id="L-auto-label"></x-label></x-menuitem>
+                    </x-menu>
+                </x-select>
+            </x-box>
+            <x-box>
+                <x-label id="input-mapping-label"></x-label>
+                <x-input id="new-mapping" size="small" class="max-width-350">
+                    <x-label id="new-input-mapping"></x-label>
+                </x-input>
+            </x-box>
+
+        </x-card>
+    </main>
+
+    <footer>
+        <x-box id="buttons-manage" class="manage-buttons">
+            <x-button id="save-mapping" size="small" class="button-success">
+                <x-icon href='#edit'></x-icon>
+                <x-label id="label-save-mapping"></x-label>
+            </x-button>
+            <x-button id="quit" size="small" class="button-close">
+                <x-icon href='#logout'></x-icon>
+                <x-label id="label-quit"></x-label>
+            </x-button>
+        </x-box>
+    </footer>
+
+    <x-notification id="notification" timeout="2500"></x-notification>
+    <script src="./mapping-renderer.js"></script>
+</body>
+
+</html>

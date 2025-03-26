@@ -1,27 +1,61 @@
 {
-    "player": {
-        "yes": "oui",
-        "no": "non",
-        "openRadio": "Je lance la radio $$ dans la pièce $$",
-        "openRadioAllRoom" : "Je lance la radio $$ dans toutes les pièces.",
-        "openRadioGenre": "Je lance la radio avec le tag : $$ ",
-        "stopRadio": "J'ai arrêté la radio dans la pièce $$|J'ai coupé la radio dans la pièce $$",
-        "radioNoMobile" : "je ne peux peux pas démarrer le player radio sur un client mobile"
-	},
-    "music": {
-		"askme": "Que veux tu écouter ?|Quelle radio veux tu écouter ?|Quelle style ou radio veux tu écouter",
-		"done": "Terminé",
-		"notFound": "Je suis désolé, je n'ai pas trouvé ce que tu demandes.",
-		"found": "Je mets $$",
-        "noTag": "Aucune Info",
-		"noradio": "je suis désolé, je n'ai pas trouvé la radio",
-        "error": "Une erreur s'est produite lors de la récupération des données."
-	},
-	"alarm": {
-		"cron": "Je planifie une tache pour lançer la radio à $$",
-		"askmeTime": "A quelle heure veux tu mettre le réveil ?",
-		"askmeDays": "Pour quels jours ?",
-		"finish": "Terminé",
-		"error": "Une erreur s'est produite.|Je ne peux pas éxécuter cette tache"
-	}
+  "player": {
+    "yes": "oui",
+    "no": "non",
+    "openRadio": "Je lance la radio $$ dans la pièce $$",
+    "openRadioAllRoom": "Je lance la radio $$ dans toutes les pièces.",
+    "openRadioGenre": "Je lance la radio avec le tag : $$ ",
+    "stopRadio": "J'ai arrêté la radio dans la pièce $$|J'ai coupé la radio dans la pièce $$",
+    "radioNoMobile": "je ne peux peux pas démarrer le player radio sur un client mobile"
+  },
+  "music": {
+    "askme": "Que veux tu écouter ?|Quelle radio veux tu écouter ?|Quelle style ou radio veux tu écouter",
+    "askmeAdv": "Veux tu élargir la recherche ?|Souhaites tu que je recherche la radio sur le web ?",
+    "done": "Terminé",
+    "notFound": "Je suis désolé, je n'ai pas trouvé ce que tu demandes.",
+    "found": "Je mets $$",
+    "noTag": "Aucune Info",
+    "noMapping": "Je suis désolé, cette commande n'est possible que si je ne comprend pas",
+    "doMapping": "D'accord, tu pourras recommencer après",
+    "noradio": "je suis désolé, je n'ai pas trouvé la radio",
+    "error": "Une erreur s'est produite lors de la récupération des données."
+  },
+  "mapping": {
+    "windowTitle": "Mappage des Radios",
+    "yousayTitle": "Ce que vous avez dit:",
+    "mappingTitle": "Ce qu'il faut enregistrer:",
+    "mappingLabel": "Correspondances existantes:",
+    "auto": "Sélectionnez...",
+    "inputMappingLabel": "Nouveau mapping:",
+    "saveMappingLabel": "Enregistrer",
+    "labelQuit": "Quitter",
+    "noMapping": "Choisissez une correspondance existante ou créez en une nouvelle avant de sauvegarder.",
+    "multiMapping": "Vous ne pouvez pas sélectionner et créer une correspondance en même temps.",
+    "existMapping": "'$$' existe déjà dans les correspondances.",
+    "newMapping": "'$$' ajouté à une nouvelle correspondance '$$'.",
+    "addedToMapping": "'$$' ajouté à la correspondance '$$'.",
+    "error": "Une erreur est survenue pendant l'ajout de la correspondance",
+    "mappingValueExists": "'$$' existe déjà comme correspondance dans '$$'"
+  },
+  "alarm": {
+    "windowTitle": "Radio Réveil",
+    "msgCron": "Lancement de la tâche cron.",
+    "openWindowSettings": "J'ouvre la fenêtre de paramètrage du réveil|J'affiche la fenêtre de configuration du réveil",
+    "noWindowSettings": "Je ne peux pas afficher la fenêtre sur un client mobile",
+    "cron": "Je planifie une tache pour lançer la radio à $$",
+    "cronEnabled": "activée",
+    "cronDisabled": "désactivé",
+    "defineNoValide": "La définition n'est pas valide",
+    "addAlarm": "Tâche planifiée $$",
+    "errorAlarm": "La tâche n'à pas été planifiée",
+    "checkDays": "Lundi|Mardi|Mercredi|Jeudi|Vendredi|Samedi|Dimanche",
+    "labelTime": "Heures :",
+    "labelDays": "Jours de la semaine :",
+    "labelQuit": "Quitter",
+    "labelSave": "Sauvegarder",
+    "askmeTime": "A quelle heure veux tu mettre le réveil ?",
+    "askmeDays": "Pour quels jours ?",
+    "finish": "Terminé",
+    "error": "Une erreur s'est produite.|Je ne peux pas éxécuter cette tache"
+  }
 }

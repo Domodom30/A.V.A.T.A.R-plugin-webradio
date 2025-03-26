@@ -1,11 +1,11 @@
 {
   "modules": {
     "webradio": {
-      "version": "3.0.0",
+      "version": "3.1.0",
       "name": "webradio",
+      "description": "Player Radio avec widget",
       "lang": "fr-FR",
       "onServer": false,
-
       "rules": {
         "playLast": [
           "{put} * last radio",
@@ -23,7 +23,6 @@
           "{play} * radio * positions",
           "{change} * radio * every? rooms"
         ],
-        
         "stop": [
           "{stop} * radio",
           "{pause} * radio"
@@ -32,14 +31,14 @@
           "{stop} * radio * rooms",
           "{pause} * radio * every? rooms"
         ],
-        "alarmClock": [
+        "launchWindowAlarm": [
           "{put} * alarm clock",
           "{put} * alarm clock * radio",
           "{put} * awakening"
         ]
       },
       "player": {
-        "radio": "FUN Radio",
+        "radio": "rtl france",
         "favoris": [
           "rire et chanson",
           "nrj",
@@ -50,10 +49,14 @@
       },
       "search": {
         "fr": {
+          "oui": "search",
+          "ok": "search",
+          "si tu veux": "search",
+          "vas y": "search",
           "correspondance": "musicMapping",
           "ajoute une correspondance": "musicMapping",
-          "comme tu veux": "musicRandom",
-          "fais-toi plaisir": "musicRandom",
+          "non": "done",
+          "terminé": "done",
           "terminer": "done"
         }
       },
@@ -82,6 +85,10 @@
         "searchRadio": {
           "fr-FR": "Veux tu que je recherche la radio ",
           "en-EN": "I'm sorry, I can't help you."
+        },
+        "searchRadioAdv": {
+          "fr-FR": "Veux tu que je lance une recherche ?|Souhaites tu que je recherche la radio sur le web ?",
+          "en-EN": "Do you want me to run a search?|Do you want me to search for the radio on the web?"
         },
         "noResponse": {
           "fr-FR": "Je suis désolé, je ne peux pas vous aider",
@@ -128,6 +135,16 @@
           }
         }
       },
+      "mappingRules": {
+        "rire & chansons": [
+          "rires et chanson",
+          "rire et chansons"
+        ],
+        "RTL France": [
+          "RTL",
+          "rtl"
+        ]
+      },
       "widget": {
         "display": true,
         "autoUpdate": {
@@ -139,6 +156,15 @@
           "title": 12,
           "value": 10,
           "position": "bottom"
+        },
+        "menu": {
+          "textColor": "rgba(255, 255, 255, 1)",
+          "fillColor": "rgba(107, 101, 99, 1)",
+          "activeFillColor": "rgba(56, 255, 0, 0.75)",
+          "doubleClickTime": 1500,
+          "font": 12,
+          "radius": 80,
+          "timeOut": 7000
         },
         "latency": 0,
         "latency_macro": 0,
@@ -155,13 +181,14 @@
       },
       "devTools": false,
       "active": true,
-      "nlpPosition": 1
+      "nlpPosition": 2
     }
   },
   "cron": {
     "webradio": {
+      "active": false,
       "name": "webradio",
-      "time": "0 10 * * 2"
+      "time": "* 20 01 * * *"
     }
   }
 }

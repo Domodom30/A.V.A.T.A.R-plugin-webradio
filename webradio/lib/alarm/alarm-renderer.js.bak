@@ -1,0 +1,118 @@
+
+const now = new Date();
+const hours = String(now.getHours()).padStart(2, "0"); // Heures sur 2 chiffres
+const minutes = String(now.getMinutes()).padStart(2, "0"); // Minutes sur 2 chiffres
+const currentTime = `${hours}:${minutes}`;
+
+window.onbeforeunload = async (e) => {
+    e.returnValue = false;
+    window.electronAPI.quitAlarm();
+};
+
+
+document.getElementById("quit").addEventListener("click", async (event) => {
+    window.dispatchEvent(new Event("beforeunload"));
+});
+
+const saveCron = document.querySelector("#save");
+saveCron.addEventListener("click", async () => {
+
+    const timeInput = document.getElementById("time").value;
+    const [hours, minutes] = timeInput.split(":");
+    const daysCheckboxes = document.querySelectorAll('x-checkbox');
+
+    const days = Array.from(daysCheckboxes)
+      .filter(checkbox => checkbox.hasAttribute('toggled')) // Vérifier si la case est cochée
+      .map(checkbox => checkbox.getAttribute('value')); // Récupérer la valeur de la case cochée
+
+
+    // Générer l'expression Cron
+    const cronExpression = `${minutes} ${hours} * * ${days.length > 0 ? days.join(',') : '*'}`;
+
+    const result = window.electronAPI.applyAlarm(cronExpression);
+    if (result) {
+        notification(await Lget("alarm.addAlarm"));
+    } else {
+        notification(await Lget("alarm.errorAlarm", true));
+    }
+  });
+
+
+
+function notification(msg, err) {
+    const notif = document.getElementById("notification");
+    notif.style.color = err ? "red" : "rgba(255, 255, 255, 0.9)";
+    if (notif.opened == true) notif.opened = false;
+    notif.innerHTML = msg;
+    notif.opened = true;
+}
+
+async function Lget(target, ...args) {
+    if (args) {
+        target = [target];
+        args.forEach((arg) => {
+            target.push(arg);
+        });
+    }
+
+    return await window.electronAPI.getMsg(target);
+}
+
+async function checkboxDays(dataCron) {
+        const selectedDays = dataCron.daysOfWeek.split(',').map(Number);
+
+        const checkDays = await Lget('alarm.checkDays');
+        const days = checkDays.split("|");  
+        const container = document.getElementById("check-days");
+
+        days.forEach((day, index) => {
+            const label = document.createElement("x-label");
+            label.textContent = day;
+
+            const checkbox = document.createElement("x-checkbox");
+            checkbox.name = "days";
+            checkbox.value = index;
+
+            if (selectedDays.includes(index)) {
+                checkbox.setAttribute('toggled', true);
+            }
+
+            if (checkbox.value != 0) {
+                checkbox.prepend(label);
+                container.appendChild(checkbox);
+            }
+        });
+
+        const label = document.createElement("x-label");
+            label.textContent = days[0];
+            const checkbox = document.createElement("x-checkbox");
+            checkbox.name = "days";
+            checkbox.value = 0;
+
+            if (selectedDays.includes(0)) {
+                checkbox.setAttribute('toggled', true);
+            }
+            checkbox.prepend(label);
+            container.appendChild(checkbox);
+}
+
+async function setTargets(dataCron) {
+
+    document.querySelector('#label-time').innerHTML = await Lget('alarm.labelTime');
+    document.querySelector('#label-days').innerHTML = await Lget('alarm.labelDays');
+    document.getElementById("window-title").innerHTML = await Lget("alarm.windowTitle");
+    document.getElementById("label-save").innerHTML = await Lget("alarm.labelSave");
+    document.getElementById("label-quit").innerHTML = await Lget("alarm.labelQuit");
+
+    if(!dataCron){
+    document.querySelector('#time').value = currentTime;} else {
+        const currentTime = `${dataCron.hours}:${dataCron.minutes}`;
+        document.querySelector('#time').value = currentTime;
+    }
+}
+
+window.electronAPI.onInitAlarm(async (_event) => {
+    const dataCron = await window.electronAPI.getAlarm();
+    await setTargets(dataCron);
+    await checkboxDays(dataCron);
+});

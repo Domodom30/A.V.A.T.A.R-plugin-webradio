@@ -1,27 +1,60 @@
 {
-    "player": {
-        "yes": "yes",
-        "no": "no",
-        "openRadio": "I am starting the radio $$ in the room $$",
-        "openRadioAllRoom": "I am starting the radio $$ in all rooms.",
-        "openRadioGenre": "I am starting the radio with the tag: $$",
-        "stopRadio": "I have stopped the radio in the room $$|I have turned off the radio in the room $$",
-        "radioNoMobile": "I cannot start the radio player on a mobile client"
-    },
-    "music": {
-        "askme": "What do you want to listen to?|What radio do you want to listen to?|What style or radio do you want to listen to?",
-        "done": "Done",
-        "notFound": "I'm sorry, I couldn't find what you're asking for.",
-        "found": "I am playing $$",
-        "noTag": "No Info",
-        "noradio": "I'm sorry, I couldn't find the radio",
-        "error": "An error occurred while retrieving the data."
-    },
-    "alarm": {
-        "cron": "I am scheduling a task to start the radio at $$",
-        "askmeTime": "What time do you want to set the alarm?",
-        "askmeDays": "For which days?",
-        "finish": "Done",
-        "error": "An error occurred.|I cannot execute this task"
-    }
+  "player": {
+    "yes": "yes",
+    "no": "no",
+    "openRadio": "I am starting the radio $$ in the room $$",
+    "openRadioAllRoom": "I am starting the radio $$ in all rooms.",
+    "openRadioGenre": "I am starting the radio with the tag: $$",
+    "stopRadio": "I have stopped the radio in the room $$|I have turned off the radio in the room $$",
+    "radioNoMobile": "I cannot start the radio player on a mobile client"
+  },
+  "music": {
+    "askme": "What do you want to listen to?|What radio do you want to listen to?|What style or radio do you want to listen to?",
+    "done": "Done",
+    "notFound": "I'm sorry, I couldn't find what you're asking for.",
+    "found": "I am playing $$",
+    "noTag": "No Info",
+    "noMapping": "I'm sorry, this command is only possible if I don't understand",
+    "doMapping": "Alright, you can try again later",
+    "noradio": "I'm sorry, I couldn't find the radio",
+    "error": "An error occurred while retrieving the data."
+  },
+  "mapping": {
+    "windowTitle": "Mapping Radios",
+    "yousayTitle": "What you said:",
+    "mappingTitle": "What to record:",
+    "mappingLabel": "Existing mappings:",
+    "auto": "Select...",
+    "inputMappingLabel": "New mapping:",
+    "saveMappingLabel": "Save",
+    "labelQuit": "Quit",
+    "noMapping": "Choose an existing mapping or create a new one before saving.",
+    "multiMapping": "You cannot select and create a mapping at the same time.",
+    "existMapping": "'$$' already exists in the mappings.",
+    "newMapping": "'$$' added to a new mapping '$$'.",
+    "addedToMapping": "'$$' added to the mapping '$$'.",
+    "error": "An error occurred while adding the mapping.",
+    "mappingValueExists": "'$$' already exists as a mapping in '$$'"
+  },
+  "alarm": {
+    "windowTitle": "Alarm clock",
+    "msgCron": "Cron task started.",
+    "openWindowSettings": "I open the alarm settings window|I display the alarm configuration window",
+    "noWindowSettings": "I cannot display the window on a mobile client.",
+    "cron": "I am scheduling a task to start the radio at $$",
+    "cronEnabled": "enabled",
+    "cronDisabled": "disabled",
+    "defineNoValide": "The definition is not valid",
+    "addAlarm": "Task successfully scheduled $$",
+    "errorAlarm": "The task has not been scheduled",
+    "checkDays": "Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday",
+    "labelTime": "Hours :",
+    "labelDays": "Days of week :",
+    "labelQuit": "Exit",
+    "labelSave": "Save",
+    "askmeTime": "What time do you want to set the alarm?",
+    "askmeDays": "For which days?",
+    "finish": "Done",
+    "error": "An error occurred.|I cannot execute this task"
+  }
 }
